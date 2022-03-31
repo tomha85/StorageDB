@@ -9,15 +9,15 @@ storage_url = "https://{}.blob.core.windows.net/".format(app.config['BLOB_ACCOUN
 blob_service = BlobServiceClient(account_url=storage_url, credential=app.config['BLOB_STORAGE_KEY'])
 
 class Animal(db.Model):
-    __tablename__ = 'animals'
+    __tablename__ = 'infor'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(75))
-    scientific_name = db.Column(db.String(75))
+    processing = db.Column(db.String(75))
     description = db.Column(db.String(800))
     image_path = db.Column(db.String(100))
 
     def __repr__(self):
-        return '<Animal {}>'.format(self.body)
+        return '<Infor {}>'.format(self.body)
 
     def save_changes(self, file):
         if file:
@@ -27,10 +27,11 @@ class Animal(db.Model):
             filename = randomFilename + '.' + fileExtension
             try:
                 # TODO: Get a blob client and upload the blob
-                pass
+                blob_client=blob_service.get_blob_client(container=blob_container,blob=filename)
+                blob_client.upload_blob(file)
                 if self.image_path:
-                    # TODO: Get a blob client and delete the previous blob
-                    pass
+                    blob_client=blob_service.get_blob_client(container=blob_container,blob=self.image_path)
+                    blob_client.delete_blob()
             except Exception as err:
                 flash(err)
             self.image_path = filename
